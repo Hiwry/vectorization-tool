@@ -76,26 +76,26 @@ function App() {
 
     return (
         <div className="container">
-            <h1>Vectorization Tool</h1>
+            <h1>Vectorizador</h1>
             <div
                 className="drop-zone"
                 ref={dropZoneRef}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
-                <p>Drag and drop an image here, or click to select one. You can also paste an image (Ctrl+V).</p>
+                <p>Arraste e solte uma imagem aqui ou clique para selecionar uma. Você também pode colar uma imagem (Ctrl+V).</p>
                 <input type="file" accept="image/*" onChange={handleImageUpload} />
             </div>
 
             {image && (
                 <div className="image-previews">
                     <div>
-                        <h3>Original Image</h3>
+                        <h3>Imagem Original</h3>
                         <img src={image} alt="uploaded" className="preview-image" />
                     </div>
                     {vectorPreview && (
                         <div>
-                            <h3>Vectorized Preview</h3>
+                            <h3>Preview Vetorizado</h3>
                             <div
                                 className="preview-svg"
                                 dangerouslySetInnerHTML={{ __html: vectorPreview }}
@@ -110,7 +110,7 @@ function App() {
 
             <div>
                 <button className="btn" onClick={handleVectorize} disabled={!image}>
-                    Vectorize Image
+                    Vectorize a Imagem
                 </button>
             </div>
         </div>
