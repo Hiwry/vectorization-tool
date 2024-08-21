@@ -51,25 +51,16 @@ function App() {
     };
 
     const handleVectorize = async () => {
-      try {
-          const response = await axios.post('/.netlify/functions/vectorize', { image });
-          const svgContent = response.data.svgContent;
-          setVectorPreview(svgContent); // Aqui você pode renderizar o SVG diretamente
-          console.log('Image vectorized successfully:', response.data);
-      } catch (error) {
-          console.error('Error vectorizing image:', error);
-      }
-  };
-  
+        try {
+            const response = await axios.post('/.netlify/functions/vectorize', { image });
+            const svgContent = response.data.svgContent;
 
-    const handleDownload = (filePath, fileName) => {
-        const downloadUrl = `http://localhost:5000/download/${filePath.split('/').pop()}`;
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            // Renderizando o SVG diretamente no HTML
+            setVectorPreview(svgContent);
+            console.log('Image vectorized successfully:', response.data);
+        } catch (error) {
+            console.error('Error vectorizing image:', error);
+        }
     };
 
     return (
@@ -81,20 +72,23 @@ function App() {
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
-                <p>Arraste e solte uma imagem aqui ou clique para selecionar uma. Você também pode colar uma imagem (Ctrl+V).</p>
+                <p>Drag and drop an image here, or click to select one. You can also paste an image (Ctrl+V).</p>
                 <input type="file" accept="image/*" onChange={handleImageUpload} />
             </div>
 
             {image && (
                 <div className="image-previews">
                     <div>
-                        <h3>Imagem Original</h3>
+                        <h3>Original Image</h3>
                         <img src={image} alt="uploaded" className="preview-image" />
                     </div>
                     {vectorPreview && (
                         <div>
-                            <h3>Preview da Imagem</h3>
-                            <img src={`http://localhost:5000/${vectorPreview}`} alt="vectorized preview" className="preview-image" />
+                            <h3>Vectorized Preview</h3>
+                            <div
+                                className="preview-svg"
+                                dangerouslySetInnerHTML={{ __html: vectorPreview }}
+                            />
                         </div>
                     )}
                 </div>
@@ -102,18 +96,9 @@ function App() {
 
             <div>
                 <button className="btn" onClick={handleVectorize} disabled={!image}>
-                    Vectorize a Imagem
+                    Vectorize Image
                 </button>
             </div>
-
-            {vectorPreview && (
-                <div>
-                    <h3>Sua imagem vetorizada está pronta!</h3>
-                    <button className="btn" onClick={() => handleDownload(vectorPreview, 'vectorized-image.svg')}>
-                        Download SVG
-                    </button>
-                </div>
-            )}
         </div>
     );
 }
