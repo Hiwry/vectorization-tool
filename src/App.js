@@ -63,6 +63,17 @@ function App() {
         }
     };
 
+    const handleDownloadSVG = () => {
+        const blob = new Blob([vectorPreview], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'vectorized-image.svg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="container">
             <h1>Vectorization Tool</h1>
@@ -89,6 +100,9 @@ function App() {
                                 className="preview-svg"
                                 dangerouslySetInnerHTML={{ __html: vectorPreview }}
                             />
+                            <button className="btn" onClick={handleDownloadSVG}>
+                                Download SVG
+                            </button>
                         </div>
                     )}
                 </div>
