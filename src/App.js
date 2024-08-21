@@ -1,25 +1,119 @@
-import logo from './logo.svg';
+import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import './App.css';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [image, setImage] = useState(null);
+    const [vectorPreview, setVectorPreview] = useState(null);
+    const dropZoneRef = useRef(null);
+
+    useEffect(() => {
+        const handlePaste = (event) => {
+            const items = event.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file' && items[i].type.startsWith('image/')) {
+                    const file = items[i].getAsFile();
+                    processFile(file);
+                }
+            }
+        };
+
+        document.addEventListener('paste', handlePaste);
+
+        return () => {
+            document.removeEventListener('paste', handlePaste);
+        };
+    }, []);
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        processFile(file);
+    };
+
+    const handleDrop = (event) => {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        processFile(file);
+    };
+
+    const processFile = (file) => {
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleDragOver = (event) => {
+        event.preventDefault();
+    };
+
+    const handleVectorize = async () => {
+        try {
+            const response = await axios.post('http://localhost:5000/vectorize', { image });
+            setVectorPreview(response.data.svgFilePath);
+            console.log('Image vectorized successfully:', response.data);
+        } catch (error) {
+            console.error('Error vectorizing image:', error);
+        }
+    };
+
+    const handleDownload = (filePath, fileName) => {
+        const downloadUrl = `http://localhost:5000/download/${filePath.split('/').pop()}`;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    return (
+        <div className="container">
+            <h1>Vectorization Tool</h1>
+            <div
+                className="drop-zone"
+                ref={dropZoneRef}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+            >
+                <p>Arraste e solte uma imagem aqui ou clique para selecionar uma. Você também pode colar uma imagem (Ctrl+V).</p>
+                <input type="file" accept="image/*" onChange={handleImageUpload} />
+            </div>
+
+            {image && (
+                <div className="image-previews">
+                    <div>
+                        <h3>Imagem Original</h3>
+                        <img src={image} alt="uploaded" className="preview-image" />
+                    </div>
+                    {vectorPreview && (
+                        <div>
+                            <h3>Preview da Imagem</h3>
+                            <img src={`http://localhost:5000/${vectorPreview}`} alt="vectorized preview" className="preview-image" />
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div>
+                <button className="btn" onClick={handleVectorize} disabled={!image}>
+                    Vectorize a Imagem
+                </button>
+            </div>
+
+            {vectorPreview && (
+                <div>
+                    <h3>Sua imagem vetorizada está pronta!</h3>
+                    <button className="btn" onClick={() => handleDownload(vectorPreview, 'vectorized-image.svg')}>
+                        Download SVG
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default App;
