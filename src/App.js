@@ -51,14 +51,16 @@ function App() {
     };
 
     const handleVectorize = async () => {
-        try {
-            const response = await axios.post('http://localhost:5000/vectorize', { image });
-            setVectorPreview(response.data.svgFilePath);
-            console.log('Image vectorized successfully:', response.data);
-        } catch (error) {
-            console.error('Error vectorizing image:', error);
-        }
-    };
+      try {
+          const response = await axios.post('/.netlify/functions/vectorize', { image });
+          const svgContent = response.data.svgContent;
+          setVectorPreview(svgContent); // Aqui você pode renderizar o SVG diretamente
+          console.log('Image vectorized successfully:', response.data);
+      } catch (error) {
+          console.error('Error vectorizing image:', error);
+      }
+  };
+  
 
     const handleDownload = (filePath, fileName) => {
         const downloadUrl = `http://localhost:5000/download/${filePath.split('/').pop()}`;
